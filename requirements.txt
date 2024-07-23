@@ -1,0 +1,14 @@
+# TODO: Add versions for library
+pandas
+numpy
+opencv-python
+torch
+matplotlib
+joblib
+tqdm
+
+# 
+pyyaml
+pytest
+pytest-dependency
+pre-commit
