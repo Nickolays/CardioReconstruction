@@ -26,6 +26,7 @@ var/
 *.egg
 
 data/
+*.pt
 # /models
 *.mp4
 /catboost_info
