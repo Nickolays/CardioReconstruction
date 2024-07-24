@@ -105,36 +105,3 @@ def dice_coef(y_true, y_pred):
 @tf.function
 def dice_loss(y_true, y_pred):
     return 1. - dice_coef(y_true, y_pred)
-
-def get_img_size(path):
-    
-    txt = tf.io.read_file(path)
-    txt = tf.strings.split(txt, sep='\n')[10:]
-    size = tf.strings.split(txt[0], sep=' ')
-    image_size = (tf.strings.to_number(size[2], out_type=tf.int32), (tf.strings.to_number(size[4], out_type=tf.int32)), 1)
-    
-    return image_size
-
-def open_image(path):
-    
-    image_size = get_img_size(path)
-    
-    path = tf.strings.regex_replace(path, '.mhd', '.raw')
-    
-    img_raw = tf.io.read_file(path)
-    image = tf.io.decode_raw(img_raw, tf.uint8)
-    
-    image = tf.reshape(image, image_size)
-    
-    return image
-
-def image_generaor(image_paths, image_size):
-    """ """
-    # Итерируемся по каждому пути
-    for img_path in image_paths:
-        # 
-        image = open_image(img_path)
-        image = tf.image.resize(image, image_size)
-        image = image / tf.reduce_max(image)
-        
-        yield image
