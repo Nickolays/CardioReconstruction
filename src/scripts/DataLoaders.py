@@ -27,7 +27,7 @@ def get_image_filepaths(main_path, img_format, as_mask=False):
 
 
 class HeartLoader(torch.utils.data.Dataset):
-    def __init__(self, imgs_paths, masks_paths):
+    def __init__(self, imgs_paths, masks_paths, image_size=(512, 512)):
         """ Simple image torch Dataset for images and masks in photo format """
         assert len(imgs_paths) == len(masks_paths)
 
@@ -42,6 +42,7 @@ class HeartLoader(torch.utils.data.Dataset):
         # Save
         self.imgs_paths = imgs_paths
         self.masks_paths = masks_paths
+        self.image_size = image_size
         
     def choose_mask(self, mask):
         """ We need only 1 type """
@@ -51,11 +52,17 @@ class HeartLoader(torch.utils.data.Dataset):
 
         img = cv2.imread(self.imgs_paths[index])
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # 
+        if img.shape[:2] != self.image_size:
+            img = cv2.resize(img, dsize=(self.image_size))
         img = self.preprocess(img)
         # img = self.normalize(img)
         img = np.transpose(img, (2, 0, 1))
 
-        mask = cv2.imread(self.masks_paths[index], 0)   # 0 meanks Like a grayscale
+
+        mask = cv2.imread(self.masks_paths[index], 0)   # 0 means Like a grayscale
+        if mask.shape[:2] != self.image_size:
+            mask = cv2.resize(mask, dsize=(self.image_size))
         # mask = preprocess(mask)
         mask = self.choose_mask(mask)
         # mask = self.posprocess(mask)
@@ -81,4 +88,9 @@ class HeartLoader(torch.utils.data.Dataset):
 def ImgForPlot(img):
     # img = np.einsum('ijk->jki', img)
     # img = (127.5*(img+1)).astype(np.uint8)
-    return np.transpose(img, (1, 2, 0))
+    try:
+        img = img.cpu().detach().numpy()
+        return np.transpose(img, (1, 2, 0))
+    except:
+        print("Already numpy.array")
+        return np.transpose(img, (1, 2, 0))

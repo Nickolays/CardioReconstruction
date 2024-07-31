@@ -3,6 +3,7 @@ pandas
 numpy
 opencv-python
 torch
+torchvision
 matplotlib
 joblib
 tqdm

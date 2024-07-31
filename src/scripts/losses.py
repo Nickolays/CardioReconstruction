@@ -381,97 +381,100 @@ def lovasz_hinge_flat(logits, labels):
 #Multi-class Lovasz loss
 #=====
 
-def lovasz_softmax(probas, labels, classes='present', per_image=False, ignore=None):
-    """
-    Multi-class Lovasz-Softmax loss
-      probas: [B, C, H, W] Variable, class probabilities at each prediction (between 0 and 1).
-              Interpreted as binary (sigmoid) output with outputs of size [B, H, W].
-      labels: [B, H, W] Tensor, ground truth labels (between 0 and C - 1)
-      classes: 'all' for all, 'present' for classes present in labels, or a list of classes to average.
-      per_image: compute the loss per image instead of per batch
-      ignore: void class labels
-    """
-    if per_image:
-class FocalLoss(nn.Module):
-    """Wraps focal loss around existing loss_fcn(), i.e. criteria = FocalLoss(nn.BCEWithLogitsLoss(), gamma=1.5)."""
-
-    def __init__(self):
-        """Initializer for FocalLoss class with no parameters."""
-        super().__init__()
-
-    @staticmethod
-    def forward(pred, label, gamma=1.5, alpha=0.25):
-        """Calculates and updates confusion matrix for object detection/classification tasks."""
-        loss = F.binary_cross_entropy_with_logits(pred, label, reduction="none")
-        # p_t = torch.exp(-loss)
-        # loss *= self.alpha * (1.000001 - p_t) ** self.gamma  # non-zero power for gradient stability
-
-        # TF implementation https://github.com/tensorflow/addons/blob/v0.7.1/tensorflow_addons/losses/focal_loss.py
-        pred_prob = pred.sigmoid()  # prob from logits
-        p_t = label * pred_prob + (1 - label) * (1 - pred_prob)
-        modulating_factor = (1.0 - p_t) ** gamma
-        loss *= modulating_factor
-        if alpha > 0:
-            alpha_factor = label * alpha + (1 - label) * (1 - alpha)
-            loss *= alpha_factor
-        return loss.mean(1).sum()
-        loss = lovasz_softmax_flat(*flatten_probas(probas, labels, ignore), classes=classes)
-    return loss
+# def lovasz_softmax(probas, labels, classes='present', per_image=False, ignore=None):
+#     """
+#     Multi-class Lovasz-Softmax loss
+#       probas: [B, C, H, W] Variable, class probabilities at each prediction (between 0 and 1).
+#               Interpreted as binary (sigmoid) output with outputs of size [B, H, W].
+#       labels: [B, H, W] Tensor, ground truth labels (between 0 and C - 1)
+#       classes: 'all' for all, 'present' for classes present in labels, or a list of classes to average.
+#       per_image: compute the loss per image instead of per batch
+#       ignore: void class labels
+#     """
+#     if per_image:
 
 
-def lovasz_softmax_flat(probas, labels, classes='present'):
-    """
-    Multi-class Lovasz-Softmax loss
-      probas: [P, C] Variable, class probabilities at each prediction (between 0 and 1)
-      labels: [P] Tensor, ground truth labels (between 0 and C - 1)
-      classes: 'all' for all, 'present' for classes present in labels, or a list of classes to average.
-    """
-    if probas.numel() == 0:
-        # only void pixels, the gradients should be 0
-        return probas * 0.
-    C = probas.size(1)
-    losses = []
-    class_to_sum = list(range(C)) if classes in ['all', 'present'] else classes
-    for c in class_to_sum:
-        fg = (labels == c).float() # foreground for class c
-        if (classes is 'present' and fg.sum() == 0):
-            continue
-        if C == 1:
-            if len(classes) > 1:
-                raise ValueError('Sigmoid output possible only with 1 class')
-            class_pred = probas[:, 0]
-        else:
-            class_pred = probas[:, c]
-        errors = (Variable(fg) - class_pred).abs()
-        errors_sorted, perm = torch.sort(errors, 0, descending=True)
-        perm = perm.data
-        fg_sorted = fg[perm]
-        losses.append(torch.dot(errors_sorted, Variable(lovasz_grad(fg_sorted))))
-    return mean(losses)
+
+# class FocalLoss(nn.Module):
+#     """Wraps focal loss around existing loss_fcn(), i.e. criteria = FocalLoss(nn.BCEWithLogitsLoss(), gamma=1.5)."""
+
+#     def __init__(self):
+#         """Initializer for FocalLoss class with no parameters."""
+#         super().__init__()
+
+#     @staticmethod
+#     def forward(pred, label, gamma=1.5, alpha=0.25):
+#         """Calculates and updates confusion matrix for object detection/classification tasks."""
+#         loss = F.binary_cross_entropy_with_logits(pred, label, reduction="none")
+#         # p_t = torch.exp(-loss)
+#         # loss *= self.alpha * (1.000001 - p_t) ** self.gamma  # non-zero power for gradient stability
+
+#         # TF implementation https://github.com/tensorflow/addons/blob/v0.7.1/tensorflow_addons/losses/focal_loss.py
+#         pred_prob = pred.sigmoid()  # prob from logits
+#         p_t = label * pred_prob + (1 - label) * (1 - pred_prob)
+#         modulating_factor = (1.0 - p_t) ** gamma
+#         loss *= modulating_factor
+#         if alpha > 0:
+#             alpha_factor = label * alpha + (1 - label) * (1 - alpha)
+#             loss *= alpha_factor
+#             return loss.mean(1).sum()
+#         loss = lovasz_softmax_flat(*flatten_probas(probas, labels, ignore), classes=classes)
+#     return loss
 
 
-#PyTorch
-ALPHA = 0.5 # < 0.5 penalises FP more, > 0.5 penalises FN more
-CE_RATIO = 0.5 #weighted contribution of modified CE loss compared to Dice loss
+# def lovasz_softmax_flat(probas, labels, classes='present'):
+#     """
+#     Multi-class Lovasz-Softmax loss
+#       probas: [P, C] Variable, class probabilities at each prediction (between 0 and 1)
+#       labels: [P] Tensor, ground truth labels (between 0 and C - 1)
+#       classes: 'all' for all, 'present' for classes present in labels, or a list of classes to average.
+#     """
+#     if probas.numel() == 0:
+#         # only void pixels, the gradients should be 0
+#         return probas * 0.
+#     C = probas.size(1)
+#     losses = []
+#     class_to_sum = list(range(C)) if classes in ['all', 'present'] else classes
+#     for c in class_to_sum:
+#         fg = (labels == c).float() # foreground for class c
+#         if (classes is 'present' and fg.sum() == 0):
+#             continue
+#         if C == 1:
+#             if len(classes) > 1:
+#                 raise ValueError('Sigmoid output possible only with 1 class')
+#             class_pred = probas[:, 0]
+#         else:
+#             class_pred = probas[:, c]
+#         errors = (Variable(fg) - class_pred).abs()
+#         errors_sorted, perm = torch.sort(errors, 0, descending=True)
+#         perm = perm.data
+#         fg_sorted = fg[perm]
+#         losses.append(torch.dot(errors_sorted, Variable(lovasz_grad(fg_sorted))))
+#     return mean(losses)
 
-class ComboLoss(nn.Module):
-    def __init__(self, weight=None, size_average=True):
-        super(ComboLoss, self).__init__()
 
-    def forward(self, inputs, targets, smooth=1, alpha=ALPHA, beta=BETA, eps=1e-9):
+# #PyTorch
+# ALPHA = 0.5 # < 0.5 penalises FP more, > 0.5 penalises FN more
+# CE_RATIO = 0.5 #weighted contribution of modified CE loss compared to Dice loss
+
+# class ComboLoss(nn.Module):
+#     def __init__(self, weight=None, size_average=True):
+#         super(ComboLoss, self).__init__()
+
+#     def forward(self, inputs, targets, smooth=1, alpha=ALPHA, beta=BETA, eps=1e-9):
         
-        #flatten label and prediction tensors
-        inputs = inputs.view(-1)
-        targets = targets.view(-1)
+#         #flatten label and prediction tensors
+#         inputs = inputs.view(-1)
+#         targets = targets.view(-1)
         
-        #True Positives, False Positives & False Negatives
-        intersection = (inputs * targets).sum()    
-        dice = (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
+#         #True Positives, False Positives & False Negatives
+#         intersection = (inputs * targets).sum()    
+#         dice = (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
         
-        inputs = torch.clamp(inputs, eps, 1.0 - eps)       
-        out = - (ALPHA * ((targets * torch.log(inputs)) + ((1 - ALPHA) * (1.0 - targets) * torch.log(1.0 - inputs))))
-        weighted_ce = out.mean(-1)
-        combo = (CE_RATIO * weighted_ce) - ((1 - CE_RATIO) * dice)
+#         inputs = torch.clamp(inputs, eps, 1.0 - eps)       
+#         out = - (ALPHA * ((targets * torch.log(inputs)) + ((1 - ALPHA) * (1.0 - targets) * torch.log(1.0 - inputs))))
+#         weighted_ce = out.mean(-1)
+#         combo = (CE_RATIO * weighted_ce) - ((1 - CE_RATIO) * dice)
         
-        return combo
+#         return combo
 

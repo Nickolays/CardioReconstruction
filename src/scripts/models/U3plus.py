@@ -1,8 +1,7 @@
-# https://github.com/nikhilroxtomar/UNET-3-plus-Implementation-in-TensorFlow-and-PyTorch/blob/main/pytorch/1-unet3plus.py
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 
 class conv_block(nn.Module):
     def __init__(self, in_c, out_c, act=True):
@@ -36,8 +35,10 @@ class encoder_block(nn.Module):
         return x, p
 
 class unet3plus(nn.Module):
-    def __init__(self, num_classes=1):
+    def __init__(self, num_classes=1, deep_sup=True):
         super().__init__()
+
+        self.deep_sup = deep_sup
 
         """ Encoder """
         self.e1 = encoder_block(3, 64)
@@ -87,8 +88,15 @@ class unet3plus(nn.Module):
 
         self.d1 = conv_block(64*5, 64)
 
-        """ Output """
-        self.y1 = nn.Conv2d(64, num_classes, kernel_size=3, padding=1)
+        """ Deep Supervision """
+        if deep_sup == True:
+            self.y1 = nn.Conv2d(64, num_classes, kernel_size=3, padding=1)
+            self.y2 = nn.Conv2d(64, num_classes, kernel_size=3, padding=1)
+            self.y3 = nn.Conv2d(64, num_classes, kernel_size=3, padding=1)
+            self.y4 = nn.Conv2d(64, num_classes, kernel_size=3, padding=1)
+            self.y5 = nn.Conv2d(1024, num_classes, kernel_size=3, padding=1)
+        else:
+            self.y1 = nn.Conv2d(64, num_classes, kernel_size=3, padding=1)
 
     def forward(self, inputs):
         """ Encoder """
@@ -172,14 +180,23 @@ class unet3plus(nn.Module):
         d1 = torch.cat([e1_d1, e2_d1, e3_d1, e4_d1, e5_d1], dim=1)
         d1 = self.d1(d1)
 
-        """ Output """
-        y1 = self.y1(d1)
+        if self.deep_sup == True:
+            y1 = self.y1(d1)
+            y2 = F.interpolate(self.y2(d2), scale_factor=2, mode="bilinear", align_corners=True)
+            y3 = F.interpolate(self.y3(d3), scale_factor=4, mode="bilinear", align_corners=True)
+            y4 = F.interpolate(self.y4(d4), scale_factor=8, mode="bilinear", align_corners=True)
+            y5 = F.interpolate(self.y5(e5), scale_factor=16, mode="bilinear", align_corners=True)
 
-        return y1
+            return y1, y2, y3, y4, y5
+
+        else:
+            y1 = self.y1(d1)
+
+            return y1
 
 
 # if __name__ == "__main__":
 #     inputs = torch.randn((8, 3, 256, 256))
 #     model = unet3plus()
-#     y1 = model(inputs)
-#     print(y1.shape)
+#     y1, y2, y3, y4, y5 = model(inputs)
+#     print(y1.shape, y2.shape, y3.shape, y4.shape, y5.shape)

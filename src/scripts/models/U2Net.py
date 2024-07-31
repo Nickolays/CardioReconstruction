@@ -151,4 +151,4 @@ class U2Net(nn.Module):
         
         side_out.append(self.lastconv(torch.cat(side_out, dim=1)))       
 
-        return [torch.sigmoid(s.squeeze(1)) for s in side_out]
+        return side_out  # [torch.sigmoid(s.squeeze(1)) for s in side_out]
