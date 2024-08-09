@@ -7,8 +7,10 @@
 
 ## 📋 Requirements
 
-* DVC
 * Python3 and pip
+* pytest
+
+* DVC
 
 ## 🏃🏻 Running Project
 
