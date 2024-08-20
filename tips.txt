@@ -4,3 +4,5 @@ https://arxiv.org/pdf/2309.12790
 https://arxiv.org/html/2402.17797v3
 # ds
 https://paperswithcode.com/dataset/a-collection-of-131-ct-datasets-of-pieces-of
+# 
+https://www.kaggle.com/code/sergeynesteruk/pytorch-albumentations-image-segmentation/notebook

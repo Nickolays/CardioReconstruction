@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 # import keras.backend as K
 # import tensorflow as tf
 
+from skimage import measure
+from scipy.interpolate import RegularGridInterpolator
+
 import os, cv2
 from tqdm import tqdm
 
@@ -28,6 +31,45 @@ def get_image_filepaths(main_path, img_format, as_mask=False):
     # assert len(files) == len(filepaths), f"There're another format of files, .txt, for instance. File is: {filepaths}"
     
     return filepaths
+
+
+def interpolate(input_image, method="linear"):
+
+    # assert 
+
+    pixelsize_old = 1
+    slice_thickness_old = 10
+
+    pixelsize_new = 1
+    slice_thickness_new = 5
+
+    x_old = np.linspace(0, (input_image.shape[1]-1)*pixelsize_old, input_image.shape[1])
+    y_old = np.linspace(0, (input_image.shape[2]-1)*pixelsize_old, input_image.shape[2])
+    z_old = np.arange(0, (input_image.shape[0]))*slice_thickness_old
+
+    my_interpolating_object = RegularGridInterpolator((z_old, x_old, y_old), input_image, method=method, bounds_error=False)
+
+    x_new = np.round(input_image.shape[1]*pixelsize_old/pixelsize_new).astype('int')
+    y_new = np.round(input_image.shape[2]*pixelsize_old/pixelsize_new).astype('int')
+    z_new = np.arange(z_old[0], z_old[-1], slice_thickness_new)
+
+    # pts is the new grid
+    pts = np.indices((len(z_new), x_new, y_new)).transpose((1, 2, 3, 0))
+    pts = pts.reshape(1, len(z_new)*x_new*y_new, 1, 3).reshape(len(z_new)*x_new*y_new, 3)
+    pts = np.array(pts, dtype=float)
+    pts[:, 1:3] = pts[:, 1:3]*pixelsize_new
+    pts[:, 0] = pts[:, 0]*slice_thickness_new + z_new[0]
+
+        # Interpolate
+    interpolated_data = my_interpolating_object(pts)
+    interpolated_data = interpolated_data.reshape(len(z_new), x_new, y_new)
+
+    interpolated_data_16bit = (np.round(((interpolated_data - interpolated_data.min())/(interpolated_data.max() - interpolated_data.min())) * 255.0)).astype(np.uint8)
+
+    # Use marching cubes to obtain the surface mesh of these ellipsoids
+    verts, faces, normals, values = measure.marching_cubes(interpolated_data_16bit, 0)
+
+    return verts, faces, normals, values
 
 
 

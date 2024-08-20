@@ -7,7 +7,7 @@ torchvision
 matplotlib
 joblib
 tqdm
-
+scipy
 # 
 pyyaml
 pytest
