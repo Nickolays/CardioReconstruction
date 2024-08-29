@@ -8,6 +8,7 @@ matplotlib
 joblib
 tqdm
 scipy
+easydict
 # 
 pyyaml
 pytest

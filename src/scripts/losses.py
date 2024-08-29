@@ -114,8 +114,6 @@ class FocalTverskyLoss(torch.nn.Module):
         return FocalTversky
 
 
-
-
 class FocalLoss(nn.Module):
     """Wraps focal loss around existing loss_fcn(), i.e. criteria = FocalLoss(nn.BCEWithLogitsLoss(), gamma=1.5)."""
 
@@ -159,8 +157,6 @@ class DiceLoss(nn.Module):
         dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
         
         return 1 - dice
-
-
 
 
 #PyTorch
