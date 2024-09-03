@@ -3,6 +3,7 @@
 # Developed by Haozhe Xie <cshzxie@gmail.com>
 
 from easydict import EasyDict as edict
+import os
 
 __C                                         = edict()
 cfg                                         = __C
@@ -10,23 +11,30 @@ cfg                                         = __C
 #
 # Dataset Config
 #
-__C.DATASETS                                = edict()
+__C.DATASETS = edict()
+__C.DATASETS.HEARTSEG = edict()
+__C.DATASETS.HEARTSEG.IMG_ROOT = 'data/train/Heart/heart_seg/heart_render'
+__C.DATASETS.HEARTSEG.TAXONOMY_FILE_PATH = 'data/train/HeartSeg.json'
+__C.DATASETS.HEARTSEG.RENDERING_PATH = os.path.join(__C.DATASETS.HEARTSEG.IMG_ROOT, '%s/%s/*.png')
+__C.DATASETS.HEARTSEG.VOXEL_PATH = 'data/train/Heart/heart_seg/voxel_volumes/%s/%s/model.npy'
+
 __C.DATASETS.SHAPENET                       = edict()
-__C.DATASETS.SHAPENET.TAXONOMY_FILE_PATH    = './datasets/ShapeNet.json'
-# __C.DATASETS.SHAPENET.TAXONOMY_FILE_PATH  = './datasets/PascalShapeNet.json'
+__C.DATASETS.SHAPENET.TAXONOMY_FILE_PATH    = 'data/train/ShapeNet.json'
 __C.DATASETS.SHAPENET.RENDERING_PATH        = '/home/hzxie/Datasets/ShapeNet/ShapeNetRendering/%s/%s/rendering/%02d.png'
-# __C.DATASETS.SHAPENET.RENDERING_PATH      = '/home/hzxie/Datasets/ShapeNet/PascalShapeNetRendering/%s/%s/render_%04d.jpg'
 __C.DATASETS.SHAPENET.VOXEL_PATH            = '/home/hzxie/Datasets/ShapeNet/ShapeNetVox32/%s/%s/model.binvox'
-__C.DATASETS.PASCAL3D                       = edict()
-__C.DATASETS.PASCAL3D.TAXONOMY_FILE_PATH    = './datasets/Pascal3D.json'
-__C.DATASETS.PASCAL3D.ANNOTATION_PATH       = '/home/hzxie/Datasets/PASCAL3D/Annotations/%s_imagenet/%s.mat'
-__C.DATASETS.PASCAL3D.RENDERING_PATH        = '/home/hzxie/Datasets/PASCAL3D/Images/%s_imagenet/%s.JPEG'
-__C.DATASETS.PASCAL3D.VOXEL_PATH            = '/home/hzxie/Datasets/PASCAL3D/CAD/%s/%02d.binvox'
-__C.DATASETS.PIX3D                          = edict()
-__C.DATASETS.PIX3D.TAXONOMY_FILE_PATH       = './datasets/Pix3D.json'
-__C.DATASETS.PIX3D.ANNOTATION_PATH          = '/home/hzxie/Datasets/Pix3D/pix3d.json'
-__C.DATASETS.PIX3D.RENDERING_PATH           = '/home/hzxie/Datasets/Pix3D/img/%s/%s.%s'
-__C.DATASETS.PIX3D.VOXEL_PATH               = '/home/hzxie/Datasets/Pix3D/model/%s/%s/%s.binvox'
+# __C.DATASETS.SHAPENET.TAXONOMY_FILE_PATH  = './datasets/PascalShapeNet.json'
+# __C.DATASETS.SHAPENET.RENDERING_PATH      = '/home/hzxie/Datasets/ShapeNet/PascalShapeNetRendering/%s/%s/render_%04d.jpg'
+
+# __C.DATASETS.PASCAL3D                       = edict()
+# __C.DATASETS.PASCAL3D.TAXONOMY_FILE_PATH    = './datasets/Pascal3D.json'
+# __C.DATASETS.PASCAL3D.ANNOTATION_PATH       = '/home/hzxie/Datasets/PASCAL3D/Annotations/%s_imagenet/%s.mat'
+# __C.DATASETS.PASCAL3D.RENDERING_PATH        = '/home/hzxie/Datasets/PASCAL3D/Images/%s_imagenet/%s.JPEG'
+# __C.DATASETS.PASCAL3D.VOXEL_PATH            = '/home/hzxie/Datasets/PASCAL3D/CAD/%s/%02d.binvox'
+# __C.DATASETS.PIX3D                          = edict()
+# __C.DATASETS.PIX3D.TAXONOMY_FILE_PATH       = './datasets/Pix3D.json'
+# __C.DATASETS.PIX3D.ANNOTATION_PATH          = '/home/hzxie/Datasets/Pix3D/pix3d.json'
+# __C.DATASETS.PIX3D.RENDERING_PATH           = '/home/hzxie/Datasets/Pix3D/img/%s/%s.%s'
+# __C.DATASETS.PIX3D.VOXEL_PATH               = '/home/hzxie/Datasets/Pix3D/model/%s/%s/%s.binvox'
 
 #
 # Dataset
@@ -34,8 +42,8 @@ __C.DATASETS.PIX3D.VOXEL_PATH               = '/home/hzxie/Datasets/Pix3D/model/
 __C.DATASET                                 = edict()
 __C.DATASET.MEAN                            = [0.5, 0.5, 0.5]
 __C.DATASET.STD                             = [0.5, 0.5, 0.5]
-__C.DATASET.TRAIN_DATASET                   = 'ShapeNet'
-__C.DATASET.TEST_DATASET                    = 'ShapeNet'
+__C.DATASET.TRAIN_DATASET                   = 'HeartSeg'  # 'ShapeNet'
+__C.DATASET.TEST_DATASET                    = 'HeartSeg'  # 'ShapeNet'
 # __C.DATASET.TEST_DATASET                  = 'Pascal3D'
 # __C.DATASET.TEST_DATASET                  = 'Pix3D'
 
@@ -45,8 +53,8 @@ __C.DATASET.TEST_DATASET                    = 'ShapeNet'
 __C.CONST                                   = edict()
 __C.CONST.DEVICE                            = '0'
 __C.CONST.RNG_SEED                          = 0
-__C.CONST.IMG_W                             = 224       # Image width for input
-__C.CONST.IMG_H                             = 224       # Image height for input
+__C.CONST.IMG_W                             = 256       # Image width for input
+__C.CONST.IMG_H                             = 256       # Image height for input
 __C.CONST.N_VOX                             = 32
 __C.CONST.BATCH_SIZE                        = 64
 __C.CONST.N_VIEWS_RENDERING                 = 1         # Dummy property for Pascal 3D
@@ -57,7 +65,8 @@ __C.CONST.CROP_IMG_H                        = 128       # Dummy property for Pas
 # Directories
 #
 __C.DIR                                     = edict()
-__C.DIR.OUT_PATH                            = './output'
+__C.DIR.OUT_PATH                            = 'results/output'
+__C.DIR.IOU_SAVE_PATH = os.path.join(__C.DIR.OUT_PATH, 'iou_scores.xlsx')
 __C.DIR.RANDOM_BG_PATH                      = '/home/hzxie/Datasets/SUN2012/JPEGImages'
 
 #
@@ -78,7 +87,7 @@ __C.NETWORK.USE_MERGER                      = True
 __C.TRAIN                                   = edict()
 __C.TRAIN.RESUME_TRAIN                      = False
 __C.TRAIN.NUM_WORKER                        = 4             # number of data workers
-__C.TRAIN.NUM_EPOCHES                       = 250
+__C.TRAIN.NUM_EPOCHS                       = 250
 __C.TRAIN.BRIGHTNESS                        = .4
 __C.TRAIN.CONTRAST                          = .4
 __C.TRAIN.SATURATION                        = .4
@@ -104,6 +113,8 @@ __C.TRAIN.UPDATE_N_VIEWS_RENDERING          = False
 #
 # Testing options
 #
-__C.TEST                                    = edict()
-__C.TEST.RANDOM_BG_COLOR_RANGE              = [[240, 240], [240, 240], [240, 240]]
-__C.TEST.VOXEL_THRESH                       = [.2, .3, .4, .5]
+__C.TEST = edict()
+__C.TEST.RANDOM_BG_COLOR_RANGE = [[240, 240], [240, 240], [240, 240]]
+__C.TEST.VOXEL_THRESH = [.2, .3, .4, .5, .6, .7, .8, .9]
+__C.TEST.TEST_NETWORK = False
+__C.TEST.VOL_OR_RENDER_SAVE = 'volume'
