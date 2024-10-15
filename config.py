@@ -13,10 +13,10 @@ cfg                                         = __C
 #
 __C.DATASETS = edict()
 __C.DATASETS.HEARTSEG = edict()
-__C.DATASETS.HEARTSEG.IMG_ROOT = 'data/train/Heart/heart_seg/heart_render'
-__C.DATASETS.HEARTSEG.TAXONOMY_FILE_PATH = 'data/train/HeartSeg.json'
-__C.DATASETS.HEARTSEG.RENDERING_PATH = os.path.join(__C.DATASETS.HEARTSEG.IMG_ROOT, '%s/%s/*.png')
-__C.DATASETS.HEARTSEG.VOXEL_PATH = 'data/train/Heart/heart_seg/voxel_volumes/%s/%s/model.npy'
+__C.DATASETS.HEARTSEG.IMG_ROOT = 'data/train/Heart/heart_seg/slices'
+__C.DATASETS.HEARTSEG.TAXONOMY_FILE_PATH = 'data/train/HeartSeg_new.json'
+__C.DATASETS.HEARTSEG.RENDERING_PATH = os.path.join(__C.DATASETS.HEARTSEG.IMG_ROOT, '%s/*.png')
+__C.DATASETS.HEARTSEG.VOXEL_PATH = f'data/train/Heart/heart_seg/voxels/%s/model.npy'
 
 __C.DATASETS.SHAPENET                       = edict()
 __C.DATASETS.SHAPENET.TAXONOMY_FILE_PATH    = 'data/train/ShapeNet.json'
@@ -55,9 +55,9 @@ __C.CONST.DEVICE                            = '0'
 __C.CONST.RNG_SEED                          = 0
 __C.CONST.IMG_W                             = 256       # Image width for input
 __C.CONST.IMG_H                             = 256       # Image height for input
-__C.CONST.N_VOX                             = 32
-__C.CONST.BATCH_SIZE                        = 64
-__C.CONST.N_VIEWS_RENDERING                 = 1         # Dummy property for Pascal 3D
+__C.CONST.N_VOX                             = 64   # 32
+__C.CONST.BATCH_SIZE                        = 8
+__C.CONST.N_VIEWS_RENDERING                 = 9         # Dummy property for Pascal 3D
 __C.CONST.CROP_IMG_W                        = 128       # Dummy property for Pascal 3D
 __C.CONST.CROP_IMG_H                        = 128       # Dummy property for Pascal 3D
 
@@ -65,9 +65,10 @@ __C.CONST.CROP_IMG_H                        = 128       # Dummy property for Pas
 # Directories
 #
 __C.DIR                                     = edict()
-__C.DIR.OUT_PATH                            = 'results/output'
+__C.DIR.OUT_PATH                            = 'results/Pix2Vox/outputs'
 __C.DIR.IOU_SAVE_PATH = os.path.join(__C.DIR.OUT_PATH, 'iou_scores.xlsx')
-__C.DIR.RANDOM_BG_PATH                      = '/home/hzxie/Datasets/SUN2012/JPEGImages'
+__C.DIR.RANDOM_BG_PATH                      = 'home/hzxie/Datasets/SUN2012/JPEGImages'
+__C.DIR.CHECKPOINTS                         = 'results/Pix2Vox'
 
 #
 # Network
@@ -76,7 +77,7 @@ __C.NETWORK = edict()
 __C.NETWORK.LEAKY_VALUE                     = .2
 __C.NETWORK.TCONV_USE_BIAS                  = False
 __C.NETWORK.LOSS_FUNC                       = 'BCELoss'
-__C.NETWORK.MODEL_SIZE                      = 64
+__C.NETWORK.MODEL_SIZE                      = 128    # 32
 __C.NETWORK.USE_EP2V                        = True
 __C.NETWORK.USE_REFINER                     = True
 __C.NETWORK.USE_MERGER                      = True
@@ -87,7 +88,7 @@ __C.NETWORK.USE_MERGER                      = True
 __C.TRAIN                                   = edict()
 __C.TRAIN.RESUME_TRAIN                      = False
 __C.TRAIN.NUM_WORKER                        = 4             # number of data workers
-__C.TRAIN.NUM_EPOCHS                       = 250
+__C.TRAIN.NUM_EPOCHS                        = 50
 __C.TRAIN.BRIGHTNESS                        = .4
 __C.TRAIN.CONTRAST                          = .4
 __C.TRAIN.SATURATION                        = .4

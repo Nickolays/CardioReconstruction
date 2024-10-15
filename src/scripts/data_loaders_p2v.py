@@ -105,6 +105,7 @@ class HeartSegDataLoader:
         # Load all taxonomies of the dataset
         with open(cfg.DATASETS.HEARTSEG.TAXONOMY_FILE_PATH, encoding='utf-8') as file:
             self.dataset_taxonomy = json.loads(file.read())
+            print(self.dataset_taxonomy)
 
     def get_dataset(self, dataset_type, n_views_rendering, selected_img_indexes, transforms=None):
         files = []
@@ -132,7 +133,11 @@ class HeartSegDataLoader:
 
         for sample_idx, sample_name in enumerate(samples):
             # Get file path of volumes
-            volume_file_path = self.volume_path_template % (taxonomy_folder_name, sample_name)
+            print((sample_name))
+            print((self.volume_path_template))     # data/train/Heart/heart_seg/voxels
+            print((taxonomy_folder_name))      # heart
+            volume_file_path = self.volume_path_template % (sample_name)
+            print(self.volume_path_template % (sample_name))
 
             if not os.path.exists(volume_file_path):
                 print('[WARN] %s Ignore sample %s/%s since volume file not exists.' %
@@ -140,7 +145,7 @@ class HeartSegDataLoader:
                 continue
 
             # Get file list of rendering images
-            img_file_path = self.rendering_image_path_template % (taxonomy_folder_name, sample_name)
+            img_file_path = self.rendering_image_path_template % (sample_name)
             rendering_images_file_path = glob.glob(img_file_path)
 
             if len(rendering_images_file_path) == 0:

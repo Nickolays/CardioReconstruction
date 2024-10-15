@@ -9,28 +9,11 @@ from scipy.interpolate import RegularGridInterpolator
 
 import os, cv2
 from tqdm import tqdm
+from natsort import natsorted
 
 import warnings
 warnings.filterwarnings('ignore')
 
-
-def get_image_filepaths(main_path, img_format, as_mask=False):
-    
-    # Сюда всё запишем
-    filepaths = []
-    # Итерируемся по всем пациентам
-    for address, dirs, files in os.walk(main_path):
-        # Все названия внутри каждого пациента
-        for name in files:
-            # Выбираем нужный формат
-            if img_format in name:
-                # Добавляем путь до изображения или маски
-                if os.path.exists(os.path.join(address, name)):
-                    filepaths.append(os.path.join(address, name))
-
-    # assert len(files) == len(filepaths), f"There're another format of files, .txt, for instance. File is: {filepaths}"
-    
-    return filepaths
 
 
 def interpolate(input_image, method="linear"):

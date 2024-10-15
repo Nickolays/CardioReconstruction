@@ -9,6 +9,8 @@ joblib
 tqdm
 scipy
 easydict
+pyntcloud   # Pix2Vox++ Reconstruction
+SimpleITK   # for CAMUS dataset
 # 
 pyyaml
 pytest

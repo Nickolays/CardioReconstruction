@@ -6,7 +6,8 @@ import vtkmodules.all as vtk
 from scipy.spatial import distance
 from vtk.util.numpy_support import vtk_to_numpy
 
-import maths_utils
+# import maths_utils
+from src.scripts.data_extraction.slicing import maths_utils
 
 
 def save_plane_img(cfg, transformed_slice, save_loc):
@@ -61,10 +62,11 @@ def prepare_meshes(cfg, mesh_path):
         resolution mesh and subsampled mesh.
     """
     case_mesh = pv.get_reader(mesh_path).read()
-    case_mesh = pv.wrap(case_mesh).threshold((cfg.LABELS.AORTA - 1, cfg.LABELS.AORTA + 1),
-                                             invert=True,
-                                             scalars=cfg.LABELS.LABEL_NAME,
-                                             preference='cell')
+    case_mesh = pv.wrap(case_mesh)
+    # case_mesh = case_mesh.threshold((cfg.LABELS.AORTA - 1, cfg.LABELS.AORTA + 1),
+    #                                 invert=True,
+    #                                 scalars=cfg.LABELS.LABEL_NAME,
+    #                                 preference='cell')
 
     origin_centred_mesh = maths_utils.translate_mesh_to_origin(case_mesh)
     low_res_mesh = subsample_mesh(cfg, origin_centred_mesh)
@@ -137,10 +139,10 @@ def find_lv_apex_raytrace(cfg, in_mesh, subsampled_mesh):
     Returns:
         lv_apex_coords (numpy.ndarray): Accurate coordinates of the left ventricular apex.
     """
-    lv_mesh = pv.wrap(in_mesh).threshold((cfg.LABELS.LV, cfg.LABELS.LV),
-                                         invert=True,
-                                         scalars=cfg.LABELS.LABEL_NAME,
-                                         preference='cell')
+    # lv_mesh = pv.wrap(in_mesh).threshold((cfg.LABELS.LV, cfg.LABELS.LV),
+    #                                      invert=True,
+    #                                      scalars=cfg.LABELS.LABEL_NAME,
+    #                                      preference='cell')
 
     mitral_valve_centroid = calc_label_com(cfg, subsampled_mesh, cfg.LABELS.MITRAL_VALVE)
 
@@ -243,7 +245,7 @@ def cell_threshold(cfg, in_mesh, start, end):
     threshold = vtk.vtkThreshold()
     threshold.SetInputData(in_mesh)
     threshold.SetInputArrayToProcess(0, 0, 0, vtk.vtkDataObject.FIELD_ASSOCIATION_CELLS, cfg.LABELS.LABEL_NAME)
-    threshold.ThresholdBetween(start, end)
+    threshold.ThresholdBetween(start, end)      # 05.09 AttributeError: 'vtkmodules.vtkFiltersCore.vtkThreshold' object has no attribute 'ThresholdBetween'
     threshold.Update()
     surfer = vtk.vtkDataSetSurfaceFilter()
     surfer.SetInputConnection(threshold.GetOutputPort())

@@ -4,8 +4,8 @@ __C = edict()
 cfg = __C
 
 __C.DATA_IN = edict()
-__C.DATA_IN.DATA_FOLDER = r'/folder/containing/binary/meshes/'
-__C.DATA_IN.SAVE_FOLDER = r'/folder/to/save/slices/to'
+__C.DATA_IN.DATA_FOLDER = r'data/train/Heart/heart_seg/heart_render'
+__C.DATA_IN.SAVE_FOLDER = r'data/train/Heart/heart_seg/slices'  # r'/folder/to/save/slices/to'
 
 #
 # Dataset Config

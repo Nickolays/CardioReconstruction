@@ -96,7 +96,7 @@ class RSU4F(nn.Module):
     
 
 class U2Net(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=1):
         super(U2Net, self).__init__()
         self.enc = nn.ModuleList([
             RSU(L=7, C_in=3, C_out=64, M=32),
@@ -116,15 +116,15 @@ class U2Net(nn.Module):
         ])
 
         self.convs = nn.ModuleList([
-            nn.Conv2d(64, 1, 3, padding=1),
-            nn.Conv2d(64, 1, 3, padding=1),
-            nn.Conv2d(128, 1, 3, padding=1),
-            nn.Conv2d(256, 1, 3, padding=1),
-            nn.Conv2d(512, 1, 3, padding=1),
-            nn.Conv2d(512, 1, 3, padding=1)
+            nn.Conv2d(64, num_classes, 3, padding=1),
+            nn.Conv2d(64, num_classes, 3, padding=1),
+            nn.Conv2d(128, num_classes, 3, padding=1),
+            nn.Conv2d(256, num_classes, 3, padding=1),
+            nn.Conv2d(512, num_classes, 3, padding=1),
+            nn.Conv2d(512, num_classes, 3, padding=1)
         ])
 
-        self.lastconv = nn.Conv2d(6, 1, 1)
+        self.lastconv = nn.Conv2d(6*num_classes, num_classes, 1)
         self.downsample = nn.MaxPool2d(2, stride=2)
 
         init_weight(self.lastconv)

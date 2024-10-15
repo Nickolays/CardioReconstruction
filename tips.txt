@@ -9,3 +9,12 @@ https://www.kaggle.com/code/sergeynesteruk/pytorch-albumentations-image-segmenta
 
 
 https://github.com/dunbar12138/pix2pix3D
+https://github.com/yizhiwang96/Slice3D/tree/main
+
+
+https://github.com/pyvista/pymeshfix
+
+
+https://blenderartists.org/t/im-trying-to-project-the-outline-of-an-object-onto-a-2d-plane/1516625
+https://blenderartists.org/t/im-trying-to-project-the-outline-of-an-object-onto-a-2d-plane/1516625
+
