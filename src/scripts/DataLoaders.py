@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-def get_image_filepaths(main_path, img_format):
+def get_image_filepaths(main_path, format):
     
     # Сюда всё запишем
     filepaths = []
@@ -17,7 +17,7 @@ def get_image_filepaths(main_path, img_format):
         # Все названия внутри каждого пациента
         for name in files:
             # Выбираем нужный формат
-            if img_format in name:
+            if format in name:
                 # Добавляем путь до изображения или маски
                 if os.path.exists(os.path.join(address, name)):
                     filepaths.append(os.path.join(address, name))
@@ -169,3 +169,85 @@ def ImgForPlot(img):
     except:
         print("Already numpy.array")
         return np.transpose(img, (1, 2, 0))
+    
+
+class FourChamberDataset(torch.utils.data.Dataset):
+    def __init__(self, image_paths, mask_paths, img_shape=(256, 256), transform=None):
+        """ """
+        assert len(image_paths) == len(mask_paths)
+        self.image_paths = image_paths
+        self.mask_paths = mask_paths
+        self.img_shape = img_shape
+        self.transform = transform
+        
+    def __getitem__(self, index):
+        img_path = self.image_paths[index]
+        msk_path = self.mask_paths[index]
+        image = self.load_image(img_path)
+        mask = self.get_mask(msk_path)
+        
+        if self.transform:
+            # image, mask = self.transform(image, mask)
+            image = self.transform(image)
+            mask = self.transform(mask)
+        
+        return image, mask
+    
+    def __len__(self):
+        return len(self.image_paths)
+    
+    def load_image(self, path):
+        img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = img / 255
+        img = img.astype(np.float32)
+
+        return img
+
+    def get_mask(self, path):
+
+        # Open .txt file
+        try:
+            txt = np.loadtxt(path)
+        except:
+            with open(path, 'r') as file:
+                txt = file.readlines()
+        cls_dict = self.prepare_txt(txt)
+
+        masks = []
+        for i in range(4):  # Because we have 4 classes
+            mask = np.zeros((self.img_shape + (1, )))
+            # Get coordinates for current class
+            try:
+                points = np.array([[[xi, yi]] for xi, yi in cls_dict[i+1]]).astype(np.int32)
+                mask = cv2.fillPoly(mask, [points], color=[255, 255, 255])
+                mask = mask / 255   # Scale
+            except:
+                mask = np.zeros((self.img_shape + (1, )))
+
+            masks.append(mask.astype(np.float32))
+
+        return np.concat(masks, axis=-1)
+
+    def prepare_txt(self, txt):
+        """ Convert raw txt file to dict with {classes: np.array of points} """
+        xy_dict = {}
+        for string in txt:
+            if isinstance(string, str):
+                string = string.split(" ")
+            cls = int(string[0])
+            string = string[1:]  # Cut class
+            # print(len(string))
+            xy = []
+            # Transform to (x, y) format
+            for i in range(0, len(string), 2):
+                x, y = string[i], string[i+1]
+                if isinstance(x, str):
+                    x, y = float(x), float(y)
+                if x < 1.0001:
+                    x, y = int(x * self.img_shape[0]), int(y * self.img_shape[1])
+                xy.append((x, y))
+            # Save
+            xy_dict[cls] = np.array(xy)
+
+        return xy_dict
